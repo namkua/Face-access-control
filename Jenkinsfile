@@ -37,7 +37,7 @@ pipeline {
                 script {
                     echo '--- Building Production Image ---'
                     // Build image với tag latest và tag theo số Build Jenkins
-                    sh "docker build -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ./apps/face_api"
+                    sh "docker build -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
 
                     echo '--- Pushing to Docker Hub ---'
                     // Sử dụng plugin credentials của Jenkins để đăng nhập an toàn
