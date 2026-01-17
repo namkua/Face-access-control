@@ -59,6 +59,8 @@ services:
     ports:
       - "16686:16686" # UI
       - "4317:4317"   # OTLP gRPC receiver
+    environment:
+      - JAEGER_HOST=jaeger
     networks:
       - mlops-net
   jenkins:

@@ -8,18 +8,31 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.resources import Resource
-
+import os
 app = FastAPI(title="Face Access Control API")
 
 # --- 1. Setup Prometheus ---
 Instrumentator().instrument(app).expose(app)
 
 # --- 2. Setup Jaeger (OpenTelemetry) ---
-resource = Resource(attributes={"service.name": "face-api-service"})
-trace.set_tracer_provider(TracerProvider(resource=resource))
-otlp_exporter = OTLPSpanExporter(endpoint="http://jaeger:4317", insecure=True)
-span_processor = BatchSpanProcessor(otlp_exporter)
-trace.get_tracer_provider().add_span_processor(span_processor)
+ENABLE_TRACING = os.getenv("ENABLE_TRACING", "true").lower() == "true"
+
+if ENABLE_TRACING:
+    # Lấy host từ biến môi trường (mặc định localhost nếu chạy local main.py)
+    JAEGER_HOST = os.getenv("JAEGER_HOST", "localhost")
+    
+    resource = Resource(attributes={"service.name": "face-api-service"})
+    trace.set_tracer_provider(TracerProvider(resource=resource))
+    
+    print(f"--> Tracing Enabled. Connecting to Jaeger at {JAEGER_HOST}:4317")
+    
+    otlp_exporter = OTLPSpanExporter(endpoint=f"http://{JAEGER_HOST}:4317", insecure=True)
+    span_processor = BatchSpanProcessor(otlp_exporter)
+    trace.get_tracer_provider().add_span_processor(span_processor)
+    
+    FastAPIInstrumentor.instrument_app(app)
+else:
+    print("--> Tracing Disabled (Test Environment)")
 
 # Tự động trace mọi request vào FastAPI
 FastAPIInstrumentor.instrument_app(app)

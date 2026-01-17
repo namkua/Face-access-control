@@ -27,7 +27,7 @@ pipeline {
                     echo '--- Running Pytest ---'
                     // Chạy test bên trong container
                     // Lưu ý: set PYTHONPATH để tìm thấy module src
-                    sh 'docker run --rm -e PYTHONPATH=/app face-api-test pytest apps/face_api/tests/test_api.py'
+                    sh 'docker run --rm -e PYTHONPATH=/app -e ENABLE_TRACING=false face-api-test pytest apps/face_api/tests/test_api.py'
                 }
             }
         }
